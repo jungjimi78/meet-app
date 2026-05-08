@@ -299,8 +299,8 @@ margin:4px;
 const STORAGE_KEY='my-swimmers-stable-v2';
 
 let swimmerEvents=JSON.parse(localStorage.getItem('my-swimmers-events-by-swimmer')||JSON.stringify({
-Bomin:['SCY|50 Free','SCY|100 Free','SCY|200 Free','SCY|500 Free','SCY|50 Back','SCY|100 Back','SCY|200 Back','SCY|50 Fly','SCY|100 Fly','SCY|200 Fly','SCY|100 Breast','SCY|200 Breast','SCY|200 IM','SCY|400 IM','LCM|50 Free','LCM|100 Free','LCM|200 Free','LCM|400 Free','LCM|50 Back','LCM|100 Back','LCM|200 Back','LCM|50 Fly','LCM|100 Fly','LCM|200 Fly','LCM|100 Breast','LCM|200 Breast','LCM|200 IM','LCM|400 IM'],
-Jayha:['SCY|50 Free','SCY|100 Free','SCY|200 Free','SCY|500 Free','SCY|50 Back','SCY|100 Back','SCY|200 Back','SCY|50 Fly','SCY|100 Fly','SCY|200 Fly','SCY|100 Breast','SCY|200 Breast','SCY|200 IM','SCY|400 IM','LCM|50 Free','LCM|100 Free','LCM|200 Free','LCM|400 Free','LCM|50 Back','LCM|100 Back','LCM|200 Back','LCM|50 Fly','LCM|100 Fly','LCM|200 Fly','LCM|100 Breast','LCM|200 Breast','LCM|200 IM','LCM|400 IM']
+Bomin:['SCY|50 Free','SCY|100 Free','SCY|200 Free','SCY|500 Free','SCY|50 Back','SCY|100 Back','SCY|200 Back','SCY|50 Fly','SCY|100 Fly','SCY|200 Fly','SCY|50 Breast','SCY|100 Breast','SCY|200 Breast','SCY|200 IM','SCY|400 IM','LCM|50 Free','LCM|100 Free','LCM|200 Free','LCM|400 Free','LCM|50 Back','LCM|100 Back','LCM|200 Back','LCM|50 Fly','LCM|100 Fly','LCM|200 Fly','LCM|100 Breast','LCM|200 Breast','LCM|200 IM','LCM|400 IM'],
+Jayha:['SCY|50 Free','SCY|100 Free','SCY|200 Free','SCY|500 Free','SCY|50 Back','SCY|100 Back','SCY|200 Back','SCY|50 Fly','SCY|100 Fly','SCY|200 Fly','SCY|50 Breast','SCY|100 Breast','SCY|200 Breast','SCY|200 IM','SCY|400 IM','LCM|50 Free','LCM|100 Free','LCM|200 Free','LCM|400 Free','LCM|50 Back','LCM|100 Back','LCM|200 Back','LCM|50 Fly','LCM|100 Fly','LCM|200 Fly','LCM|100 Breast','LCM|200 Breast','LCM|200 IM','LCM|400 IM']
 }));
 
 const cutProfiles={
@@ -314,11 +314,22 @@ const defaultCuts={
 'Jayha-200 Free-SCY':{ELITE:'2:08.00',JAG:'2:18.00',SAG:'2:28.00'},
 'Jayha-50 Back-SCY':{ELITE:'30.50',JAG:'32.50',SAG:'34.50'},
 'Jayha-100 Back-SCY':{ELITE:'1:05.00',JAG:'1:10.00',SAG:'1:15.00'},
+'Jayha-50 Breast-SCY':{ELITE:'36.00',JAG:'39.00',SAG:'38.20'},
 'Jayha-100 Breast-SCY':{ELITE:'1:12.00',JAG:'1:18.00',SAG:'1:24.00'},
 'Jayha-200 Breast-SCY':{ELITE:'2:38.00',JAG:'2:48.00',SAG:'2:58.00'},
 'Jayha-50 Fly-SCY':{ELITE:'28.50',JAG:'30.50',SAG:'32.50'},
 'Jayha-100 Fly-SCY':{ELITE:'1:04.00',JAG:'1:09.00',SAG:'1:14.00'},
-'Jayha-200 IM-SCY':{ELITE:'2:20.00',JAG:'2:30.00',SAG:'2:40.00'},
+'Jayha-100 IM-SCY':{ELITE:'1:08.40'},
+'Jayha-50 Free-LCM':{ELITE:'31.20',JAG:'32.50',SAG:'32.30'},
+'Jayha-100 Free-LCM':{ELITE:'1:07.40',JAG:'1:10.40',SAG:'1:10.40'},
+'Jayha-200 Free-LCM':{ELITE:'2:27.10',JAG:'2:35.90',SAG:'2:34.30'},
+'Jayha-50 Back-LCM':{ELITE:'36.70',JAG:'38.60',SAG:'38.50'},
+'Jayha-100 Back-LCM':{ELITE:'1:17.80',JAG:'1:24.30',SAG:'1:24.30'},
+'Jayha-50 Breast-LCM':{ELITE:'41.00',JAG:'44.30',SAG:'43.40'},
+'Jayha-100 Breast-LCM':{ELITE:'1:17.80',JAG:'1:35.30',SAG:'1:35.00'}
+'Jayha-50 Fly-LCM':{ELITE:'34.50',JAG:'36.10',SAG:'35.90'},
+'Jayha-100 Fly-LCM':{ELITE:'1:16.80',JAG:'1:23.60',SAG:'1:23.60'},
+'Jayha-200 IM-LCM':{ELITE:'2:47.10',JAG:'2:55.80',SAG:'2:54.40'},
 'Bomin-50 Free-SCY':{SECTIONAL:'22.19',SECTIONAL_BONUS:'22.79',FUTURE:'22.54'},
 'Bomin-100 Free-SCY':{SECTIONAL:'48.19',SECTIONAL_BONUS:'49.79',FUTURE:'51.37'},
 'Bomin-200 Free-SCY':{SECTIONAL:'1:45.79',SECTIONAL_BONUS:'1:48.79',FUTURE:'1:58.90'},
