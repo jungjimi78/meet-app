@@ -1,0 +1,41 @@
+name: Apply Jayha Audit
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-jayha-audit.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          p=Path('index.html'); s=p.read_text()
+          j11={'50 Free':['27.40','28.60','28.60'],'100 Free':['59.30','1:02.00','1:03.00'],'200 Free':['2:09.60','2:17.60','2:18.90'],'500 Free':['5:48.80','6:15.50','6:21.20'],'50 Back':['32.50','34.30','34.50'],'100 Back':['1:09.00','1:14.90','1:15.10'],'200 Back':['N/A','N/A','2:25.00'],'50 Breast':['36.00','39.00','39.30'],'100 Breast':['1:18.40','1:24.10','1:25.20'],'200 Breast':['N/A','N/A','2:39.30'],'50 Fly':['30.40','31.90','32.60'],'100 Fly':['1:07.90','1:14.10','1:14.40'],'200 Fly':['N/A','N/A','2:20.90'],'100 IM':['1:08.40','N/A','1:13.80'],'200 IM':['2:27.60','2:35.50','2:38.50'],'400 IM':['N/A','N/A','5:11.00']}
+          j13={'50 Free':['24.60','25.20','25.50'],'100 Free':['53.20','54.90','55.40'],'200 Free':['1:56.20','2:01.60','2:01.90'],'500 Free':['5:16.90','5:36.20','5:37.70'],'50 Back':['27.69','28.89','28.89'],'100 Back':['1:01.40','1:06.00','1:05.10'],'200 Back':['2:13.30','2:25.40','2:25.00'],'50 Breast':['31.69','33.09','33.09'],'100 Breast':['1:08.10','1:12.20','1:13.30'],'200 Breast':['2:29.70','2:40.50','2:39.30'],'50 Fly':['27.19','28.39','28.39'],'100 Fly':['59.40','1:02.20','1:02.80'],'200 Fly':['2:18.10','2:33.70','2:33.70'],'200 IM':['2:12.10','2:17.70','2:17.50'],'400 IM':['4:45.00','5:05.00','5:11.00']}
+          for obj,vals in [('jayhaDefaults',j11),('jayha13Defaults',j13)]:
+            a=s.index('const '+obj+'={'); b=s.index('};',a)+2; block=s[a:b]
+            for ev,v in vals.items():
+              pat="('"+re.escape(ev)+"-SCY':)\\[[^\\]]*\\]"
+              block,n=re.subn(pat,lambda m:m.group(1)+repr(v).replace(' ',''),block,count=1)
+              if not n and obj=='jayhaDefaults': block=block[:-2]+",'"+ev+"-SCY':"+repr(v).replace(' ','')+block[-2:]
+            s=s[:a]+block+s[b:]
+          if 'function repairJayhaScyOfficial()' not in s:
+            fn='function repairJayhaScyOfficial(){const a='+json.dumps(j11,separators=(',',':'))+',b='+json.dumps(j13,separators=(',',':'))+';for(const [e,v] of Object.entries(a)){const k=`Jayha-${e}-SCY`;data.cuts[k]={...(data.cuts[k]||{}),CUT1:v[0],CUT2:v[1],CUT3:v[2]}}for(const [e,v] of Object.entries(b)){const k=`Jayha13-${e}-SCY`;data.cuts[k]={...(data.cuts[k]||{}),CUT1:v[0],CUT2:v[1],CUT3:v[2]}}saveData()}\n'
+            s=s.replace('function normalizeEvents(){',fn+'function normalizeEvents(){',1)
+            needle='normalizeEvents();applyEventUpdates();migrateJayha13ShortWag();applyJayhaWagUpdate();restoreJayhaLongSag();'
+            s=s.replace(needle,needle+'repairJayhaScyOfficial();',1)
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || git commit -m "Correct Jayha standards from official SCS tables"
+          git push
