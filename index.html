@@ -49,6 +49,8 @@ const jayha13Defaults={
 '500 Free-SCY':['5:16.90','5:36.20','5:36.20'],
 '50 Back-SCY':['27.69','28.89','28.89'],
 '100 Back-SCY':['1:01.40','1:06.00','1:06.00'],
+'50 Breast-SCY':['31.69','33.09','33.09'],
+'100 Breast-SCY':['1:08.10','1:12.20','1:12.20'],
 '200 Breast-SCY':['2:29.70','2:40.50','2:40.50'],
 '50 Fly-SCY':['27.19','28.39','28.39'],
 '100 Fly-SCY':['59.40','1:02.20','1:01.80'],
@@ -83,7 +85,7 @@ function secondsToTime(sec){if(sec==null||isNaN(sec))return '-';if(sec>=60){cons
 function getPB(ev,course){const arr=data.records.filter(r=>r.swimmer===currentSwimmer&&r.event===ev&&r.course===course).map(r=>timeToSeconds(r.time)).filter(v=>v!=null);return arr.length?Math.min(...arr):null}
 function slotKey(swimmer,ev,course){if(swimmer==='Jayha'&&jayhaAgeProfile==='13-14')return `Jayha13-${ev}-${course}`;return `${swimmer}-${ev}-${course}`}
 function ensureCuts(swimmer,ev,course){const key=slotKey(swimmer,ev,course);if(!data.cuts[key])data.cuts[key]={};const c=data.cuts[key];if(swimmer==='Bomin'){
-if((c.CUT1==null||c.CUT1==='Junior National')&&bominBase[`${ev}-${course}`]?.[0])c.CUT1=bominBase[`${ev}-${course}`][0];
+if(ev==='50 Free'&&course==='LCM'){if(typeof c.CUT1==='string'&&!Number.isFinite(timeToSeconds(c.CUT1)))c.CUT1='25.89';if(!Number.isFinite(timeToSeconds(c.CUT2)))c.CUT2='24.59';}
 if(c.CUT1==null)c.CUT1=c.SECTIONAL??bominBase[`${ev}-${course}`]?.[0]??'-';
 if((c.CUT2==null||c.CUT2==='-')&&bominBase[`${ev}-${course}`]?.[1])c.CUT2=bominBase[`${ev}-${course}`][1];
 if(c.CUT2==null)c.CUT2=c.FUTURE??bominBase[`${ev}-${course}`]?.[1]??'-';
@@ -103,20 +105,16 @@ function renderLabels(){const l=cutLabels[currentSwimmer];label1.value=l[0];labe
 function loadCutForm(){renderLabels();const ev=cutEventSelect.value;if(!ev){cut1.value=cut2.value=cut3.value='';return}const c=ensureCuts(currentSwimmer,ev,cutCourseSelect.value);cut1.value=c.CUT1==='-'?'':c.CUT1;cut2.value=c.CUT2==='-'?'':c.CUT2;cut3.value=c.CUT3==='-'?'':c.CUT3}
 function renderAll(){renderStats();refreshDropdowns();renderLabels();renderTable()}
 function quickAddRecord(ev){const t=prompt(`${ev} 기록 입력\n예: 1:01.86`);if(!t)return;data.records.push({swimmer:currentSwimmer,date:new Date().toISOString().slice(0,10),course:currentCourse,meet:'',event:ev,time:t.trim(),note:''});saveData();renderAll()}
-function switchScreen(name){document.querySelectorAll('main').forEach(x=>x.classList.add('hidden'));document.getElementById(`screen-${name}`).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===name));if(name==='cuts')refreshDropdowns()}
-function setCourse(course){currentCourse=course;courseLCM.classList.toggle('active',course==='LCM');courseSCY.classList.toggle('active',course==='SCY');refreshDropdowns();renderTable()}
-normalizeEvents();applyEventUpdates();
-document.querySelectorAll('.swimmer-tab').forEach(b=>b.addEventListener('click',()=>{currentSwimmer=b.dataset.swimmer;renderAll()}));
-courseLCM.addEventListener('click',()=>setCourse('LCM'));courseSCY.addEventListener('click',()=>setCourse('SCY'));
-jayhaAge1112.addEventListener('click',()=>{jayhaAgeProfile='11-12';localStorage.setItem(JAYHA_AGE_KEY,jayhaAgeProfile);renderAll()});
-jayhaAge1314.addEventListener('click',()=>{jayhaAgeProfile='13-14';localStorage.setItem(JAYHA_AGE_KEY,jayhaAgeProfile);renderAll()});
-document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchScreen(b.dataset.screen)));
-document.addEventListener('click',e=>{const cell=e.target.closest('.event-entry-cell');if(cell)quickAddRecord(cell.dataset.event);const mv=e.target.closest('[data-move]');if(mv){const arr=swimmerEvents[currentSwimmer]||[],idx=arr.indexOf(mv.dataset.event),step=mv.dataset.move==='up'?-1:1,to=idx+step;if(idx>=0&&to>=0&&to<arr.length&&arr[to].startsWith(currentCourse+'|')){[arr[idx],arr[to]]=[arr[to],arr[idx]];saveEvents();renderAll();}return;}const rm=e.target.closest('[data-remove]');if(rm){swimmerEvents[currentSwimmer]=(swimmerEvents[currentSwimmer]||[]).filter(x=>x!==rm.dataset.remove);saveEvents();renderAll()}});
-cutEventSelect.addEventListener('change',loadCutForm);cutCourseSelect.addEventListener('change',()=>{currentCourse=cutCourseSelect.value;courseLCM.classList.toggle('active',currentCourse==='LCM');courseSCY.classList.toggle('active',currentCourse==='SCY');refreshDropdowns();renderTable()});
-saveCutsBtn.addEventListener('click',()=>{const ev=cutEventSelect.value;if(!ev)return;const c=ensureCuts(currentSwimmer,ev,cutCourseSelect.value);c.CUT1=cut1.value.trim()||'-';c.CUT2=cut2.value.trim()||'-';c.CUT3=cut3.value.trim()||'-';saveData();renderTable();alert('CUT 저장됨')});
-saveLabelsBtn.addEventListener('click',()=>{cutLabels[currentSwimmer]=[label1.value.trim()||'CUT 1',label2.value.trim()||'CUT 2',label3.value.trim()||'CUT 3'];saveLabels();renderLabels();renderTable();alert('기준 이름 저장됨')});
-quickAddEventBtn.addEventListener('click',()=>{const v=prompt('새 종목 이름\n예: 200 IM');if(!v)return;const ev=v.trim();if(!ev)return;const tagged=`${currentCourse}|${ev}`;if(!swimmerEvents[currentSwimmer])swimmerEvents[currentSwimmer]=[];if(!swimmerEvents[currentSwimmer].includes(tagged)){swimmerEvents[currentSwimmer].push(tagged);saveEvents();renderAll();cutEventSelect.value=ev;loadCutForm()}});
-renderAll();switchScreen('dashboard');
+document.addEventListener('click',e=>{const cell=e.target.closest('.event-entry-cell');if(cell){quickAddRecord(cell.dataset.event);return}const m=e.target.closest('[data-move]');if(m){const raw=m.dataset.event,arr=swimmerEvents[currentSwimmer],idx=arr.indexOf(raw);if(idx<0)return;const dir=m.dataset.move==='up'?-1:1;let target=idx+dir;while(target>=0&&target<arr.length&&arr[target].split('|')[0]!==currentCourse)target+=dir;if(target<0||target>=arr.length)return;[arr[idx],arr[target]]=[arr[target],arr[idx]];saveEvents();renderAll();return}const r=e.target.closest('[data-remove]');if(r){if(!confirm(`${r.dataset.remove.split('|')[1]} 종목을 목록에서 삭제할까?\n기존 기록은 지우지 않아.`))return;swimmerEvents[currentSwimmer]=swimmerEvents[currentSwimmer].filter(x=>x!==r.dataset.remove);saveEvents();renderAll()}});
+document.querySelectorAll('.swimmer-tab').forEach(b=>b.onclick=()=>{currentSwimmer=b.dataset.swimmer;renderAll()});
+courseLCM.onclick=()=>{currentCourse='LCM';courseLCM.classList.add('active');courseSCY.classList.remove('active');renderAll()};courseSCY.onclick=()=>{currentCourse='SCY';courseSCY.classList.add('active');courseLCM.classList.remove('active');renderAll()};
+jayhaAge1112.onclick=()=>{jayhaAgeProfile='11-12';localStorage.setItem(JAYHA_AGE_KEY,jayhaAgeProfile);renderAll()};jayhaAge1314.onclick=()=>{jayhaAgeProfile='13-14';localStorage.setItem(JAYHA_AGE_KEY,jayhaAgeProfile);renderAll()};
+document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('main').forEach(m=>m.classList.add('hidden'));document.getElementById(`screen-${b.dataset.screen}`).classList.remove('hidden');if(b.dataset.screen==='cuts')refreshDropdowns()});
+cutEventSelect.onchange=loadCutForm;cutCourseSelect.onchange=()=>{currentCourse=cutCourseSelect.value;renderAll()};
+saveLabelsBtn.onclick=()=>{cutLabels[currentSwimmer]=[label1.value.trim()||'CUT 1',label2.value.trim()||'CUT 2',label3.value.trim()||'CUT 3'];saveLabels();renderAll();alert('기준 이름 저장 완료')};
+saveCutsBtn.onclick=()=>{const ev=cutEventSelect.value,course=cutCourseSelect.value,key=slotKey(currentSwimmer,ev,course);data.cuts[key]={CUT1:cut1.value.trim()||'-',CUT2:cut2.value.trim()||'-',CUT3:cut3.value.trim()||'-'};saveData();renderAll();alert('CUT 저장 완료')};
+quickAddEventBtn.onclick=()=>{const ev=prompt('추가할 종목 이름\n예: 100 IM');if(!ev)return;const course=cutCourseSelect.value,raw=`${course}|${ev.trim()}`;if(!swimmerEvents[currentSwimmer].includes(raw)){swimmerEvents[currentSwimmer].push(raw);saveEvents()}renderAll()};
+normalizeEvents();applyEventUpdates();renderAll();
 </script>
 </body>
 </html>
