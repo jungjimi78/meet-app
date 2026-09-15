@@ -1,0 +1,38 @@
+name: Fix Jayha 11-12 SCY
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-jayha-11-12-scy.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          p=Path('index.html');s=p.read_text()
+          v={'50 Free':['27.40','28.60','28.60'],'100 Free':['59.30','1:02.00','1:03.00'],'200 Free':['2:09.60','2:17.60','2:18.90'],'500 Free':['5:48.80','6:15.50','6:21.20'],'50 Back':['32.50','34.30','34.50'],'100 Back':['1:09.00','1:14.90','1:15.10'],'200 Back':['N/A','N/A','2:25.00'],'50 Breast':['36.00','39.00','39.30'],'100 Breast':['1:18.40','1:24.10','1:25.20'],'200 Breast':['N/A','N/A','2:39.30'],'50 Fly':['30.40','31.90','32.60'],'100 Fly':['1:07.90','1:14.10','1:14.40'],'200 Fly':['N/A','N/A','2:20.90'],'100 IM':['1:08.40','N/A','1:13.80'],'200 IM':['2:27.60','2:35.50','2:38.50'],'400 IM':['N/A','N/A','5:11.00']}
+          a=s.index('const jayhaDefaults={');b=s.index('};',a)+2;block=s[a:b]
+          for e,x in v.items():
+            pat="('"+re.escape(e)+"-SCY':)\\[[^\\]]*\\]"
+            block,n=re.subn(pat,lambda m:m.group(1)+repr(x).replace(' ',''),block,count=1)
+            if not n:block=block[:-2]+",'"+e+"-SCY':"+repr(x).replace(' ','')+block[-2:]
+          s=s[:a]+block+s[b:]
+          if 'function repairJayha1112Scy()' not in s:
+            fn='function repairJayha1112Scy(){const v='+json.dumps(v,separators=(',',':'))+';for(const [e,x] of Object.entries(v)){const k=`Jayha-${e}-SCY`;data.cuts[k]={...(data.cuts[k]||{}),CUT1:x[0],CUT2:x[1],CUT3:x[2]}}saveData()}\n'
+            s=s.replace('function normalizeEvents(){',fn+'function normalizeEvents(){',1)
+            s=s.replace('normalizeEvents();applyEventUpdates();','normalizeEvents();applyEventUpdates();repairJayha1112Scy();',1)
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || git commit -m "Fix all Jayha 11-12 SCY standards"
+          git push
