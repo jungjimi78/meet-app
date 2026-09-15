@@ -66,7 +66,10 @@ const jayha13Defaults={
 '100 Breast-LCM':['1:17.60','1:22.10','1:22.10'],
 '200 Breast-LCM':['2:48.60','3:02.10','3:02.10'],
 '50 Fly-LCM':['30.49','31.89','31.89'],
-'100 Fly-LCM':['1:07.40','1:10.40','1:10.00']
+'100 Fly-LCM':['1:07.40','1:10.40','1:10.00'],
+'200 Fly-LCM':['2:36.10','2:53.40','2:53.40'],
+'200 IM-LCM':['2:29.90','2:36.00','2:34.80'],
+'400 IM-LCM':['5:22.80','5:44.90','5:44.70']
 };
 const bominBase={
 '50 Free-SCY':['22.19','21.29'],'100 Free-SCY':['48.19','46.39'],'200 Free-SCY':['1:45.79','1:41.59'],'50 Back-SCY':['24.79','23.69'],'100 Back-SCY':['53.89','51.49'],'200 Back-SCY':['1:57.29','1:52.79'],'50 Free-LCM':['25.89','24.59'],'100 Free-LCM':['56.09','51.99'],'200 Free-LCM':['2:03.09','1:57.79'],'50 Back-LCM':['29.29','27.89'],'100 Back-LCM':['1:03.29','1:00.59'],'200 Back-LCM':['2:17.39','2:11.89']};
@@ -80,12 +83,14 @@ function secondsToTime(sec){if(sec==null||isNaN(sec))return '-';if(sec>=60){cons
 function getPB(ev,course){const arr=data.records.filter(r=>r.swimmer===currentSwimmer&&r.event===ev&&r.course===course).map(r=>timeToSeconds(r.time)).filter(v=>v!=null);return arr.length?Math.min(...arr):null}
 function slotKey(swimmer,ev,course){if(swimmer==='Jayha'&&jayhaAgeProfile==='13-14')return `Jayha13-${ev}-${course}`;return `${swimmer}-${ev}-${course}`}
 function ensureCuts(swimmer,ev,course){const key=slotKey(swimmer,ev,course);if(!data.cuts[key])data.cuts[key]={};const c=data.cuts[key];if(swimmer==='Bomin'){
+if(ev==='50 Free'&&course==='LCM'&&typeof c.CUT1==='string'&&!Number.isFinite(timeToSeconds(c.CUT1)))c.CUT1='25.89';
 if(c.CUT1==null)c.CUT1=c.SECTIONAL??bominBase[`${ev}-${course}`]?.[0]??'-';
 if(c.CUT2==null)c.CUT2=c.FUTURE??bominBase[`${ev}-${course}`]?.[1]??'-';
 if(c.CUT3==null)c.CUT3=c.JR_NATIONAL??jrNational[`${ev}-${course}`]??'-';
 }else{
 const source=jayhaAgeProfile==='13-14'?jayha13Defaults:jayhaDefaults;
 const d=source[`${ev}-${course}`]||['-','-','-'];
+if(jayhaAgeProfile==='13-14'){if((c.CUT1==null||c.CUT1==='-')&&d[0]!=='-')c.CUT1=d[0];if((c.CUT2==null||c.CUT2==='-')&&d[1]!=='-')c.CUT2=d[1];if((c.CUT3==null||c.CUT3==='-')&&d[2]!=='-')c.CUT3=d[2];}
 if(c.CUT1==null)c.CUT1=c.ELITE??d[0];if(c.CUT2==null)c.CUT2=c.JAG??d[1];if(c.CUT3==null)c.CUT3=c.SAG??d[2];}
 return c}
 function normalizeEvents(){Object.keys(defaultEvents).forEach(name=>{if(!swimmerEvents[name])swimmerEvents[name]=defaultEvents[name];swimmerEvents[name]=swimmerEvents[name].map(x=>String(x).includes('|')?x:`SCY|${x}`).filter((v,i,a)=>a.indexOf(v)===i)});saveEvents()}
